@@ -1,0 +1,26 @@
+#ifndef DESCRIPTORWORKER_H
+#define DESCRIPTORWORKER_H
+#include "descriptor.h"
+#include "imgmatrix.h"
+
+class DescriptorFabric
+{
+private:
+    ImgMatrix inputMatrix1;
+    QVector<Descriptor> descriptors1;
+public:
+    DescriptorFabric(ImgMatrix inputMatrix);
+
+    void CalculateDescriptors(int harrisRadius, int harrisPointsNum, int basketNum, int histogramGridSize, int descriptorSize);
+
+    QImage CompareDescriptor(ImgMatrix inputMatrix2, QVector<Descriptor> descriptors2);
+
+    ImgMatrix MergeTwoMatrix(ImgMatrix inputMatrix2);
+
+    double GetDistance(Descriptor d1,Descriptor d2);
+
+    QVector<Descriptor> GetDescriptors(){return descriptors1;}
+
+};
+
+#endif // DESCRIPTORWORKER_H

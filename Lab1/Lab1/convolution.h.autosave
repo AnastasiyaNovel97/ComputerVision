@@ -1,0 +1,21 @@
+#ifndef CONVOLUTION_H
+#define CONVOLUTION_H
+#include "grayscalematrix.h"
+
+#include <QVector>
+#include <QtMath>
+
+class Convolution
+{
+public:
+     Convolution();
+     GrayScaleMatrix Convolute(GrayScaleMatrix inputGSMatrix, QVector<QVector<double>> convCore);
+     QVector<QVector<double>> MatrixMult(QVector<QVector<double>> matrix1, QVector<QVector<double>> matrix2);
+
+     GrayScaleMatrix GetDerivateX(GrayScaleMatrix inputGSMatrix); //получить массивы с частными производными
+     GrayScaleMatrix GetDerivateY(GrayScaleMatrix inputGSMatrix);
+     GrayScaleMatrix SobelOperator(GrayScaleMatrix inputGSMatrix);
+     GrayScaleMatrix GaussianFilter(GrayScaleMatrix inputGSMatrix,double sigma);
+};
+
+#endif // CONVOLUTION_H

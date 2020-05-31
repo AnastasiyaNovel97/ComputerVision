@@ -1,0 +1,252 @@
+#include "KeyFeatures.h"
+#include <QDebug>
+
+KeyFeatures::KeyFeatures(ImgMatrix inputMatrix)
+{
+    this->inputMatrix = inputMatrix;
+}
+
+
+ImgMatrix KeyFeatures::Moravec(int windowRadius, int resultPointsNum)
+{
+    int w = inputMatrix.Width();
+    int h = inputMatrix.Height();
+
+    ImgMatrix moravecMatrix(w,h);
+    MatrixConv myConv(inputMatrix);
+    ImgMatrix smoothMatrix = myConv.Gauss(1.3);
+
+    for(int i=windowRadius+1; i < h-windowRadius-1; i++)
+    {
+        for(int j=windowRadius+1; j < w-windowRadius-1; j++)
+        {
+            double localCoeff = std::numeric_limits <double>::max();
+            for(int iy = -1; iy <= 1; iy++)
+            {
+                for(int ix = -1; ix <= 1; ix++)
+                {
+                    if(ix!=0 && iy!=0)
+                    {
+                        double sum = 0;
+                        for (int u = -windowRadius; u <= windowRadius; u++) {
+                            for (int v = -windowRadius; v <= windowRadius; v++) {
+                                double tmp =  smoothMatrix.GetValue(j,i) - smoothMatrix.GetValue(j+ix+u,i+iy+v);
+                                sum += tmp * tmp;
+                            }
+                        }
+                        localCoeff = std::min(sum,localCoeff);
+                    }
+                }
+                moravecMatrix.SetValue(j,i,localCoeff);
+            }
+        }
+    }
+
+    GetLocalMaximums(moravecMatrix, windowRadius, false);
+
+    int maxRadius = std::min(w/2,h/2);
+    ReducePoints(resultPointsNum, maxRadius);
+
+    smoothMatrix = inputMatrix;
+    foreach (KeyPoint point, interestingPoints.keyPoints) {
+        for(int i=-1; i<=1; i++)
+        {
+            for(int j=-1; j<=1; j++)
+            {
+                if(i==0 || j==0)
+                {
+                    try
+                    {
+                        smoothMatrix.SetValue(point.x+j,point.y+i,1);
+                    } catch(_exception e){}
+                }
+            }
+        }
+    }
+    return smoothMatrix;
+}
+
+
+void KeyFeatures::GetLocalMaximums(ImgMatrix responseMatrix, int windowRadius, bool isHarris)
+{
+    interestingPoints.Clear();
+    int w = responseMatrix.Width();
+    int h = responseMatrix.Height();
+    //responseMatrix.SaveImage("F:\\har1.jpg");
+    responseMatrix.NormalizeDouble();
+    //responseMatrix.SaveImage("F:\\har2.jpg");
+    //находим мин и макс для порога
+    double  min = std::numeric_limits <double>::max(),
+            max = std::numeric_limits <double>::min();
+    for(int i = 0; i < h; i++)
+    {
+         for(int j = 0; j < w; j++)
+         {
+             double temp = responseMatrix.GetValue(j,i);
+            if (max < temp) max = temp;
+            if (min > temp) min = temp;
+        }
+    }
+
+    //задаем порог
+    double thresholdCoeff = 0.005;
+    if(isHarris) thresholdCoeff = 0.004;
+    double threshold = min + (max - min) * thresholdCoeff;
+
+    //добавляем точки в список, только если они сильнейшие в своей окрестности
+    for (int i = 0; i < h; i++)
+    {
+        for (int j = 0; j < w; j++)
+        {
+            bool is_correct = true;
+            double sLocal = responseMatrix.GetValue(j,i);
+            for (int px = -windowRadius; px <= windowRadius && is_correct; px++) {
+                for (int py = -windowRadius; py <= windowRadius && is_correct; py++) {
+                    if (px != 0 || py != 0) {
+                        is_correct = sLocal > responseMatrix.GetValue(j+px,i+py);
+                    }
+                }
+            }
+            if (is_correct && sLocal > threshold) {
+                interestingPoints.keyPoints.append(KeyPoint(j,i,sLocal));
+            }
+        }
+    }
+}
+
+void KeyFeatures::ReducePoints(int resultPointsNum, int maxRadius)
+{
+    int r = 3;
+    qDebug() <<"--Num of points on start = " << interestingPoints.keyPoints.size();
+    while (interestingPoints.keyPoints.size() > resultPointsNum && r < maxRadius)
+    {
+        for(int i=0; i < interestingPoints.keyPoints.size(); i++)
+        {
+            for(int j=i+1; j< interestingPoints.keyPoints.size(); j++)
+            {
+                double xd = interestingPoints.keyPoints[i].x - interestingPoints.keyPoints[j].x;
+                double yd = interestingPoints.keyPoints[i].y - interestingPoints.keyPoints[j].y;
+                double dist = sqrt(xd * xd + yd * yd);
+                if(dist <= r)
+                {
+                    if(interestingPoints.keyPoints[i].sLocal < interestingPoints.keyPoints[j].sLocal)
+                    {
+                        interestingPoints.keyPoints.remove(i);
+                        i--;
+                        j = interestingPoints.keyPoints.size();
+                    }
+                }
+            }
+        }
+        r++;
+        qDebug() <<"--Num of points = " << interestingPoints.keyPoints.size() << " radius = " << r;
+    }
+
+}
+0123456789
+ 012345678
+  01234567
+   0123456
+    012345
+     01234
+      0123
+       012
+        01
+         0
+
+
+ImgMatrix KeyFeatures::Harris(int windowRadius, int resultPointsNum)
+{
+    ImgMatrix smoothMatrix = inputMatrix;
+    MatrixConv myConv(smoothMatrix);
+    smoothMatrix = myConv.Gauss(1.3);
+    //inputGSMatrix = Convolution::GaussianFilter(inputGSMatrix, 1.3);
+
+    //находим производные
+//    ImgMatrix derivateX = Convolution::DerivateX(inputGSMatrix);
+//    ImgMatrix derivateY = Convolution::DerivateY(inputGSMatrix);
+    ImgMatrix derivateX = myConv.DerivateX();
+    ImgMatrix derivateY = myConv.DerivateY();
+
+    int w = smoothMatrix.Width();
+    int h = smoothMatrix.Height();
+
+    QVector<QVector<double>>    a,
+                                b,
+                                c;
+
+    //находим веса для окна - ядро Гаусса
+    double sigma = static_cast<double>(windowRadius*2) / 6;
+    QVector<QVector<double>>gaussKernel;
+
+    double coeff = 1 / (2 * M_PI * sigma * sigma);
+    double delitel = 2 * sigma * sigma;
+
+    for (int u = -windowRadius; u <= windowRadius; u++)
+    {
+        QVector<double> gaussRow;
+        for (int v = -windowRadius; v <= windowRadius; v++)
+        {
+            gaussRow.append(coeff * exp(- (u * u + v * v) / delitel));
+        }
+        gaussKernel.append(gaussRow);
+    }
+
+    //Вычисляем A, B, C для всех точек
+    for (int i = 0; i < h; i++)
+    {
+        QVector<double> aRow,bRow,cRow;
+         for (int j = 0; j < w; j++)
+         {
+            double sumA = 0, sumB = 0, sumC = 0;
+
+            for (int u = -windowRadius; u <= windowRadius; u++)
+            {
+                for (int v = -windowRadius; v <= windowRadius; v++)
+                {
+                    double i_x = derivateX.GetValue(j + v, i + u);
+                    double i_y = derivateY.GetValue(j + v, i + u);
+                    sumA += i_x * i_x * gaussKernel[windowRadius+u][windowRadius+v];
+                    sumB += i_x * i_y * gaussKernel[windowRadius+u][windowRadius+v];
+                    sumC += i_y * i_y * gaussKernel[windowRadius+u][windowRadius+v];
+                }
+            }
+            aRow.append(sumA);
+            bRow.append(sumB);
+            cRow.append(sumC);
+        }
+         a.append(aRow);
+         b.append(bRow);
+         c.append(cRow);
+    }
+
+
+    ImgMatrix harrisMatrix(w,h);   //здесь будем хранить значения оператора
+
+    for (int i =0; i < h; i++) {
+        for (int j =0; j < w; j++) {
+            double sc = a[i][j] + c[i][j];
+            double d = a[i][j] * c[i][j] - b[i][j] * b[i][j];
+            double det = sc * sc - 4 * d;
+            double L1 = (sc + sqrt(det)) / 2;
+            double L2 = (sc - sqrt(det)) / 2;
+            double cHarris = std::min (L1, L2);
+            harrisMatrix.SetValue(j, i, cHarris);
+        }
+    }
+
+    GetLocalMaximums(harrisMatrix, windowRadius, true);
+
+    ReducePoints(resultPointsNum, std::min(w/2,h/2));
+
+    smoothMatrix = inputMatrix;
+    foreach (KeyPoint point, interestingPoints.keyPoints)
+        for(int i=-1; i<=1; i++)
+            for(int j=-1; j<=1; j++)
+                if(i==0 || j==0)
+                    smoothMatrix.SetValue(point.x+j,point.y+i,1);
+
+    return smoothMatrix;
+}
+
+

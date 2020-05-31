@@ -1,0 +1,152 @@
+#include "grayscalematrix.h"
+
+GrayScaleMatrix::GrayScaleMatrix(QString path)
+{
+    GetMatrixFromImage(path);
+}
+
+GrayScaleMatrix::GrayScaleMatrix(int width, int height)
+{
+    QVector<QVector<double>> tempMatrix;
+    for(int i=0; i < height; i++)
+    {
+        QVector<double> tempLine;
+        for(int j = 0; j < width; j++)
+        {
+            tempLine.append(0);
+        }
+        tempMatrix.append(tempLine);
+    }
+    imageMatrix = tempMatrix;
+}
+
+GrayScaleMatrix::GrayScaleMatrix(QVector<QVector<double>> newMatrix)
+{
+    imageMatrix = newMatrix;
+}
+
+GrayScaleMatrix::GrayScaleMatrix(QVector<QVector<unsigned char>> newMatrix)
+{
+    SetMatrixDoubleFrom255(newMatrix);
+}
+
+QVector<QVector<unsigned char>> GrayScaleMatrix::GetMatrix255()
+{
+    QVector<QVector<unsigned char>> resultMatrix;
+    double width = imageMatrix[0].size();
+    double height = imageMatrix.size();
+
+    double min=0,max=1;
+
+    //output data normalization
+    for(int i=0; i<imageMatrix.size(); i++)
+    {
+        for(int j=0; j<imageMatrix[0].size(); j++)
+        {
+            if(imageMatrix[i][j]>max)
+                max=imageMatrix[i][j];
+            if(imageMatrix[i][j]<min)
+                min=imageMatrix[i][j];
+        }
+    }
+
+
+    for (int i = 0; i < height; i++) {
+        QVector<unsigned char> resultLine;
+        for (int j = 0; j < width; j++) {
+            resultLine.append((double)(imageMatrix[i][j]-min)*255/(max-min));
+        }
+        resultMatrix.append(resultLine);
+    }
+    return resultMatrix;
+}
+
+
+QVector<QVector<double>> GrayScaleMatrix::GetMatrixDouble()
+{
+    return imageMatrix;
+}
+
+
+void GrayScaleMatrix::SetMatrixDoubleFrom255(QVector<QVector<unsigned char>> inputMatrix)
+{
+    QVector<QVector<double>> resultMatrix;
+    double width = inputMatrix[0].size();
+    double height = inputMatrix.size();
+    for (int i = 0; i < height; i++) {
+        QVector<double> resultLine;
+        for (int j = 0; j < width; j++) {
+            resultLine.append((double)inputMatrix[i][j]/255);
+        }
+        resultMatrix.append(resultLine);
+    }
+    imageMatrix = resultMatrix;
+}
+
+
+void GrayScaleMatrix::GetMatrixFromImage(QString path)
+{
+    QImage inputImage1;
+    QVector<QVector<unsigned char>> imageMatrix;
+    if(inputImage1.load(path))
+    {
+        QImage inputImage = inputImage1.convertToFormat(QImage::Format_RGB32);
+        {
+            for(int i = 0; i < inputImage.height(); i++)
+            {
+                QVector<unsigned char> pixelLine;
+
+                for(int j = 0; j < inputImage.width(); j++)
+                {
+                    float brightness;
+                    QColor pColor = inputImage.pixelColor(j,i);
+                    brightness = pColor.red()*0.299 + pColor.green()*0.587 + pColor.blue()*0.114;//0.213𝑅𝑅+0.715𝐺𝐺+0.072𝐵𝐵;
+
+                    pixelLine.append(brightness);
+                }
+                imageMatrix.append(pixelLine);
+            }
+        }
+    }
+    SetMatrixDoubleFrom255(imageMatrix);
+ }
+
+void GrayScaleMatrix::DrawImageFromMatrix(QString path)
+{
+    QVector<QVector<unsigned char>> imageMatrix = GetMatrix255();
+    QImage outputImage(imageMatrix.at(0).size(),imageMatrix.size(),QImage::Format_RGB32);
+
+
+    for(int i=0; i<outputImage.height(); i++)
+    {
+        for(int j=0; j<outputImage.width(); j++)
+        {
+            unsigned char grayShade = imageMatrix[i][j];
+            outputImage.setPixel(j,i,qRgb(grayShade,grayShade,grayShade));
+        }
+    }
+    outputImage.save(path);
+}
+
+
+double GrayScaleMatrix::GetValue(int x, int y)
+{
+    return imageMatrix.at(y).at(x);
+}
+
+void GrayScaleMatrix::SetValue(int x, int y, double value)
+{
+    imageMatrix[y][x] = value;
+}
+
+int GrayScaleMatrix::GetWidth()
+{
+    return imageMatrix[0].size();
+}
+
+int GrayScaleMatrix::GetHeight()
+{
+    return imageMatrix.size();
+}
+
+
