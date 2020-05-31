@@ -131,9 +131,10 @@ void ImgMatrix::SaveImage(QString path)
 double ImgMatrix::GetValue(int x, int y)
 {
     //Если координаты лежат за границами массива - возвращаем значение граничного пикселя
-    int i = y < 0 ? i = 0 : (y > imgMatr.size()-1 ? i = imgMatr.size()-1 : i = y);
-    int j = x < 0 ? j = 0 : (x > imgMatr[i].size()-1 ? j = imgMatr[i].size()-1 : j = x);
-    return imgMatr.at(i).at(j);
+    int i, j;
+    i = x <= 0 ? 0 : (x >= imgMatr[0].size() - 1 ? imgMatr[0].size() - 1 : x);
+    j = y <= 0 ? 0 : (y >= imgMatr.size() - 1 ? imgMatr.size() - 1 : y);
+    return imgMatr[j][i];
 }
 
 void ImgMatrix::SetValue(int x, int y, double value)
