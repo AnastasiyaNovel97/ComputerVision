@@ -51,7 +51,8 @@ int main(int argc, char *argv[])
     lab1("D:\\ComputerVision\\Lab1\\","elf",".jpg",3);
     lab1("D:\\ComputerVision\\Lab1\\","anime",".jpg",3);
     lab1("D:\\ComputerVision\\Lab1\\","anime2",".jpg",3);
-    Print("\nПреобразования изображений закончены, изменения сохранены в попке Modified.");
+      lab1("D:\\ComputerVision\\Lab1\\","city",".jpg",3);
+    Print("\nПреобразования изображений закончены, изменения сохранены в папке Modified.");
 
     return a.exec();
 }

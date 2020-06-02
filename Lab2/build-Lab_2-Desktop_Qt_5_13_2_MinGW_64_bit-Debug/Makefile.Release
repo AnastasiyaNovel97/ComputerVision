@@ -360,7 +360,7 @@ release/main.o: ../Lab2/main.cpp ../Lab2/imgMatrix.h \
 		../../../Qt/5.13.2/mingw73_64/include/QtCore/qobject_impl.h \
 		../../../Qt/5.13.2/mingw73_64/include/QtCore/qline.h \
 		../../../Qt/5.13.2/mingw73_64/include/QtGui/qpainterpath.h \
-		../Lab2/pyramidFabric.h \
+		../Lab2/pyramidfabric.h \
 		../Lab2/MatrixConv.h \
 		../../../Qt/5.13.2/mingw73_64/include/QtCore/QtMath \
 		../../../Qt/5.13.2/mingw73_64/include/QtCore/qmath.h \
@@ -506,7 +506,7 @@ release/main.o: ../Lab2/main.cpp ../Lab2/imgMatrix.h \
 		../../../Qt/5.13.2/mingw73_64/include/QtCore/qtcoreversion.h
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o release\main.o ..\Lab2\main.cpp
 
-release/pyramidFabric.o: ../Lab2/pyramidFabric.cpp ../Lab2/pyramidFabric.h \
+release/pyramidFabric.o: ../Lab2/pyramidFabric.cpp ../Lab2/pyramidfabric.h \
 		../Lab2/imgMatrix.h \
 		../../../Qt/5.13.2/mingw73_64/include/QtCore/QVector \
 		../../../Qt/5.13.2/mingw73_64/include/QtCore/qvector.h \
@@ -584,7 +584,19 @@ release/pyramidFabric.o: ../Lab2/pyramidFabric.cpp ../Lab2/pyramidFabric.h \
 		../../../Qt/5.13.2/mingw73_64/include/QtGui/qpainterpath.h \
 		../Lab2/MatrixConv.h \
 		../../../Qt/5.13.2/mingw73_64/include/QtCore/QtMath \
-		../../../Qt/5.13.2/mingw73_64/include/QtCore/qmath.h
+		../../../Qt/5.13.2/mingw73_64/include/QtCore/qmath.h \
+		../../../Qt/5.13.2/mingw73_64/include/QtCore/QDebug \
+		../../../Qt/5.13.2/mingw73_64/include/QtCore/qdebug.h \
+		../../../Qt/5.13.2/mingw73_64/include/QtCore/qhash.h \
+		../../../Qt/5.13.2/mingw73_64/include/QtCore/qmap.h \
+		../../../Qt/5.13.2/mingw73_64/include/QtCore/qtextstream.h \
+		../../../Qt/5.13.2/mingw73_64/include/QtCore/qlocale.h \
+		../../../Qt/5.13.2/mingw73_64/include/QtCore/qvariant.h \
+		../../../Qt/5.13.2/mingw73_64/include/QtCore/qshareddata.h \
+		../../../Qt/5.13.2/mingw73_64/include/QtCore/qset.h \
+		../../../Qt/5.13.2/mingw73_64/include/QtCore/qcontiguouscache.h \
+		../../../Qt/5.13.2/mingw73_64/include/QtCore/qsharedpointer.h \
+		../../../Qt/5.13.2/mingw73_64/include/QtCore/qsharedpointer_impl.h
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o release\pyramidFabric.o ..\Lab2\pyramidFabric.cpp
 
 ####### Install

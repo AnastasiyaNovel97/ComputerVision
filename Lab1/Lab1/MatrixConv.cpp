@@ -22,7 +22,7 @@ ImgMatrix MatrixConv::Convolution(QVector<QVector<double>> core)
 
             for (int u = -yRadius; u <= yRadius; u++)//для каждого ряда в ядре
                 for (int v = -xRadius; v <= xRadius; v++)  //для каждого значения в ряду
-                    sum += inputMatrix.GetValue(j + v, i + u) * core[u+yRadius][v+xRadius];
+                    sum += inputMatrix.GetValue(j - v, i - u) * core[u+yRadius][v+xRadius];
             outputMatrix.SetValue(j,i,sum);
         }
 

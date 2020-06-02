@@ -1,4 +1,5 @@
 #include "pyramidfabric.h"
+#include <QDebug>
 
 PyramidFabric::PyramidFabric(ImgMatrix inputMatrix)
 {
@@ -36,16 +37,22 @@ PyramidFabric::Pyramid PyramidFabric::GetPyramid(int octavesNum, int levelsNum, 
     double actSigma = sigma0;
     for(int i = 0; i < octavesNum; i++)
     {
+        double testSigma = sigma0;
         double currSigma = sigma0;
         Octave currOctave;
         Level currLevel(workMatrix,currSigma,actSigma);
         currOctave.levels.append(currLevel);
+        qDebug() <<endl<< "Octave " << i << endl;
+        qDebug()<<"currSigma = " << currSigma << "; actSigma = " << actSigma<<endl;
 
-        for (int j = 1; j < levelsNum; j++)
+        for (int j = 0; j < levelsNum; j++)
         {
+            sigmaB = sqrt(pow(currSigma*levelInterval,2) - pow(currSigma,2));
+            testSigma = sqrt(testSigma*testSigma + sigmaB*sigmaB);
             currSigma *= levelInterval;
             actSigma *= levelInterval;
-            workMatrix = myConv.Gauss(currSigma);
+            qDebug()<<"currSigma = " << currSigma << "; actSigma = " << actSigma<<endl;
+            workMatrix = myConv.Gauss(sigmaB);
             myConv.SetMatrix(workMatrix);
 
             currLevel.matrix = workMatrix;
