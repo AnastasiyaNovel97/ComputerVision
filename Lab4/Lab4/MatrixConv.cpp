@@ -120,20 +120,21 @@ ImgMatrix MatrixConv::Gauss(double sigma)
     QVector<double> str;
     for (int j = -sigmaInt; j <= sigmaInt; j++)
     {
-        str.append(exp( -(j * j) / coeff) / (M_PI * coeff));
+        str.append(exp( -(j * j) / coeff) / sqrt(M_PI * coeff));
     }
     core.append(str);
 
-    ImgMatrix resMatr = Convolution(core);
+    MatrixConv myConv ( Convolution(core));
+
 
     for (int j = -sigmaInt; j <= sigmaInt; j++)
     {
         QVector<double> str1;
-        str1.append(exp( -(j * j) / coeff) / (M_PI * coeff));
-        core1.append(str);
+        str1.append(exp( -(j * j) / coeff) / sqrt(M_PI * coeff));
+        core1.append(str1);
     }
 
-    return Convolution(core1); //непосредственно вычисляем
+    return myConv.Convolution(core1); //непосредственно вычисляем
 }
 
 ImgMatrix MatrixConv::SobelDirection()
