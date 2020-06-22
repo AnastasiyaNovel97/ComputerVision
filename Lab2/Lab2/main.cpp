@@ -37,23 +37,25 @@ void lab2(QString path, QString fileName, QString ext, int octavesNum, int level
     Print("\n************************************************************************************************\n");
 }
 
-
 int main()
 {
-    lab2("D:\\ComputerVision\\Lab2\\","bicycle",".jpg",6,5,0,1,7.13);
-    lab2("D:\\ComputerVision\\Lab2\\","bicycle_copy",".jpg",6,7,0,1,7.13);
+//    lab2("D:\\ComputerVision\\Lab2\\","bicycle",".jpg",6,5,0,1,7.13);
+//    lab2("D:\\ComputerVision\\Lab2\\","bicycle_copy",".jpg",6,7,0,1,7.13);
 
-    lab2("D:\\ComputerVision\\Lab2\\","bunny",".jpg",2,3,0,1,5.23);
-    lab2("D:\\ComputerVision\\Lab2\\","bunny_copy",".jpg",2,5,0,1,5.23);
+//    lab2("D:\\ComputerVision\\Lab2\\","bunny",".jpg",2,3,0,1,5.23);
+//    lab2("D:\\ComputerVision\\Lab2\\","bunny_copy",".jpg",2,5,0,1,5.23);
 
-    lab2("D:\\ComputerVision\\Lab2\\","elf",".jpg",4,2,0,1,3.45);
-    lab2("D:\\ComputerVision\\Lab2\\","elf_copy",".jpg",4,7,0,1,3.45);
+//    lab2("D:\\ComputerVision\\Lab2\\","elf",".jpg",4,2,0,1,3.45);
+//    lab2("D:\\ComputerVision\\Lab2\\","elf_copy",".jpg",4,7,0,1,3.45);
 
-    lab2("D:\\ComputerVision\\Lab2\\","anime",".jpg",5,2,0,1,6.36);
-    lab2("D:\\ComputerVision\\Lab2\\","anime_copy",".jpg",5,5,0,1,6.36);
+//    lab2("D:\\ComputerVision\\Lab2\\","anime",".jpg",5,2,0,1,6.36);
+//    lab2("D:\\ComputerVision\\Lab2\\","anime_copy",".jpg",5,5,0,1,6.36);
 
-    lab2("D:\\ComputerVision\\Lab2\\","anime2",".jpg",3,3,0,1,3.36);
-    lab2("D:\\ComputerVision\\Lab2\\","anime2_copy",".jpg",3,5,0,1,3.36);
+//    lab2("D:\\ComputerVision\\Lab2\\","anime2",".jpg",3,3,0,1,3.36);
+//    lab2("D:\\ComputerVision\\Lab2\\","anime2_copy",".jpg",3,5,0,1,3.36);
+
+    lab2("D:\\ComputerVision\\Lab2\\","drive1",".jpg",3,3,0,1,3.36);
+    lab2("D:\\ComputerVision\\Lab2\\","drive2",".jpg",3,5,0,1,3.36);
 
 
     Print("\nВыполнение успешно завершено.\n");
