@@ -67,24 +67,17 @@ int Descriptor::GetY()
 }
 
 void Descriptor::Normalize()
-{
-    for(int k=0; k<2; k++)
-    {
-        double length=0;
+{  
+    double length=0;
 
-        for(int i =0; i<pointDescriptor.size(); i++)
-            for(int j=0; j<pointDescriptor[i].size(); j++)
-                length+= pointDescriptor[i][j]*pointDescriptor[i][j];
+    for(int i =0; i<pointDescriptor.size(); i++)
 
-        length = sqrt(length);
+        for(int j=0; j<pointDescriptor[i].size(); j++)
+            length+= pointDescriptor[i][j];
 
-        for(int i =0; i<pointDescriptor.size(); i++)
-            for(int j=0; j<pointDescriptor[i].size(); j++)
-            {
-                pointDescriptor[i][j] /= length;
-
-                if(pointDescriptor[i][j] > 0.2 && k==0)
-                    pointDescriptor[i][j]=0.2;
-            }
-    }
+    for(int i =0; i<pointDescriptor.size(); i++)
+        for(int j=0; j<pointDescriptor[i].size(); j++)
+        {
+            pointDescriptor[i][j] /= length;
+        }
 }

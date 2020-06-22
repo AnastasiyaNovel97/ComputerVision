@@ -33,4 +33,5 @@ HEADERS += \
     RussianText.h \
     descriptor.h \
     descriptorFabric.h \
+    helper.h \
     imgMatrix.h

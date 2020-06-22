@@ -11,11 +11,12 @@ class InterestingPoints
 {
 public:
     InterestingPoints(ImgMatrix inputMatrix);
-    struct interestPoint
+    struct InterestPoint
     {
         int x,y;
         double sLocal;
-        interestPoint(int x, int y, double sLocal)
+        int angle;
+        InterestPoint(int x, int y, double sLocal)
         {
             this->x = x;
             this->y = y;
@@ -25,8 +26,8 @@ public:
     //Набор интересных точек
     struct PointSet
     {
-        QVector<interestPoint> points;
-        void Clear(){points = QVector<interestPoint>();}
+        QVector<InterestPoint> points;
+        void Clear(){points = QVector<InterestPoint>();}
     };
     ImgMatrix Moravec(int windowRadius, int resultPointsNum);//Находит и отрисовывает интересные точки методом Моравека
     ImgMatrix Harris(int windowRadius, int resultPointsNum);//Находит и отрисовывает интересные точки методом Харриса

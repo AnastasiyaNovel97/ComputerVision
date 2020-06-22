@@ -117,21 +117,35 @@ ImgMatrix MatrixConv::Gauss(double sigma)
         sigmaInt++;
     double coeff = 2 * sigma * sigma;
 
+    double sum = 0;
     QVector<double> str;
     for (int j = -sigmaInt; j <= sigmaInt; j++)
     {
-        str.append(exp( -(j * j) / coeff) / (M_PI * coeff));
+        double gaussValue = exp( -(j * j) / coeff) / (M_PI * coeff);
+        str.append(gaussValue);
+        sum += gaussValue;
     }
     core.append(str);
+    //Нормализуем ядро Гаусса
+    foreach(QVector<double> row, core)
+        foreach(double value, row)
+            value /= sum;
 
     ImgMatrix resMatr = Convolution(core);
 
+    sum = 0;
     for (int j = -sigmaInt; j <= sigmaInt; j++)
     {
         QVector<double> str1;
-        str1.append(exp( -(j * j) / coeff) / (M_PI * coeff));
+        double gaussValue = exp( -(j * j) / coeff) / (M_PI * coeff);
+        str1.append(gaussValue);
+        sum += gaussValue;
         core1.append(str);
     }
+    //Нормализуем ядро Гаусса
+    foreach(QVector<double> row, core1)
+        foreach(double value, row)
+            value /= sum;
 
     return Convolution(core1); //непосредственно вычисляем
 }

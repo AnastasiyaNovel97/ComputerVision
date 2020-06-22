@@ -1,9 +1,17 @@
 #include "descriptorFabric.h"
+#include "helper.h"
 #include <QPainter>
 
-DescriptorFabric::DescriptorFabric(ImgMatrix inputMatrix)
+DescriptorFabric::DescriptorFabric(ImgMatrix inputMatrix, int harrisRadius,int harrisPointsNum,
+                                   int basketNum,int histogramGridSize,int descriptorSize)
 {
     inputMatrix1 = inputMatrix;
+    this->harrisRadius = harrisRadius;
+    this->harrisPointsNum = harrisPointsNum;
+    this->basketNum = basketNum;
+    this->histogramGridSize = histogramGridSize;
+    this->descriptorSize = descriptorSize;
+
 }
 
 
@@ -20,8 +28,116 @@ double DescriptorFabric::Distance(Descriptor d1,Descriptor d2)
     return sqrt(result);
 }
 
+double DescriptorFabric::DistancePoints(int x1, int y1, int x2, int y2)
+{
+   return sqrt(pow((x1 - x2), 2) + pow((y1 - y2), 2));
+}
 
-void DescriptorFabric::CalculateDescriptors(int harrisRadius,int harrisPointsNum,int basketNum,int histogramGridSize,int descriptorSize)
+
+InterestingPoints::PointSet DescriptorFabric::OrientPoints(ImgMatrix gradientDirection, ImgMatrix gradientMagnitude,InterestingPoints::PointSet inputPoints)
+{
+    InterestingPoints::PointSet orientedPoints;
+    int localBasketCount = 36;  //число корзин
+    double localBasketSize = 360.0 / localBasketCount;  //охват корзины
+    int descriptorRadius = descriptorSize / 2 * histogramGridSize;
+    //int histogramRadius = histogramGridSize / 2;
+
+
+    //находим ядро Гаусса
+    QVector<QVector<double>> gaussCore = Helper::GaussCore(descriptorRadius / 6, descriptorRadius);
+
+    for(int index = 0; index < inputPoints.points.size(); index++) {
+
+        double localBaskets[localBasketCount];
+        for (int i = 0; i < localBasketCount; i++)
+            localBaskets[i] = 0;
+
+        InterestingPoints::InterestPoint currPoint = inputPoints.points[index];
+
+        for(int i = -descriptorRadius; i <= descriptorRadius; i++){
+            for(int j = -descriptorRadius; j <= descriptorRadius; j++){
+
+                //В пределах ?
+                if(sqrt(i * i + j * j) < sqrt(2)*descriptorRadius){
+
+                    //Направление Фи
+                    double direction =  gradientDirection.GetValue(currPoint.x + i, currPoint.y + j);
+
+                    //в какую корзину пишем
+                    double basketBetw = direction / localBasketSize;
+
+                    int basket1 = floor(basketBetw);
+                    double b1Weight = 1;
+
+                    int basket2 = ceil(basketBetw);
+                    double b2Weight = 0;
+
+                    if(basketBetw < basket1 + 0.5)
+                    {
+                        basket2 = basket1 - 1;
+                        if(basket2 < 0) basket2 = localBasketCount - 1;
+
+                        b1Weight = abs(basketBetw - floor(basketBetw) + 0.5);
+                    }
+                    else
+                    {
+                        basket2 = basket1 + 1;
+                        if(basket2 > localBasketCount - 1) basket2 = 0;
+
+                        b1Weight = abs(basketBetw - floor(basketBetw) - 0.5);
+
+                    }
+                    b2Weight = 1. - b1Weight;
+
+                    double currMagnitude = gradientMagnitude.GetValue(currPoint.x + i,currPoint.y + j);
+
+                    localBaskets[basket1] += currMagnitude * b1Weight * gaussCore[(i + descriptorRadius)][(j + descriptorRadius)];
+
+                    localBaskets[basket2] += currMagnitude * b2Weight * gaussCore[(i + descriptorRadius)][(j + descriptorRadius)];
+                }
+            }
+        }
+
+        double firstMaxValue = -1;
+        int firstMaxIndex = -1;
+        double secondMaxValue = -1;
+        int secondMaxIndex = -1;
+
+        //ищем первую и вторую максимальную
+        for(int i = 0; i < localBasketCount; i++){
+            if(localBaskets[i] > firstMaxValue){
+                secondMaxValue = firstMaxValue;
+                secondMaxIndex = firstMaxIndex;
+
+                firstMaxValue = localBaskets[i];
+                firstMaxIndex = i;
+            } else {
+                if(localBaskets[i] > secondMaxValue){
+                    secondMaxValue = localBaskets[i];
+                    secondMaxIndex = i;
+                }
+            }
+        }
+
+        //добавляем первую
+        InterestingPoints::InterestPoint firstPoint(inputPoints.points[index]);
+        firstPoint.angle = (firstMaxIndex * localBasketSize);
+        orientedPoints.points.push_back(firstPoint);
+
+        //если вторая корзина >= 0.8 от макс значения, то добваляем ее тоже
+        if(secondMaxValue >= (firstMaxValue * 0.8)){
+            InterestingPoints::InterestPoint otherPoint(inputPoints.points[index]);
+            otherPoint.angle = (secondMaxIndex * localBasketSize);
+            orientedPoints.points.push_back(otherPoint);
+        }
+
+    }
+    return orientedPoints;
+}
+
+
+
+void DescriptorFabric::CalculateDescriptors()
 {
     QVector<Descriptor> imageDescriptor;
     InterestingPoints pointFabr(inputMatrix1);
@@ -33,84 +149,67 @@ void DescriptorFabric::CalculateDescriptors(int harrisRadius,int harrisPointsNum
     ImgMatrix dy = myConv.DerivateY();
     ImgMatrix gradientDirection = myConv.SobelDirection();
     ImgMatrix gradientMagnitude = myConv.Sobel();
+    harrisPoints = OrientPoints(gradientDirection,gradientMagnitude,harrisPoints);
 
     double basketSize = 360. / basketNum;
     int descriptorRadius = descriptorSize / 2 * histogramGridSize;
-    int histogramRadius = histogramGridSize / 2;
 
-
-    //находим ядро Гаусса
-    double sigma = static_cast<double>(histogramGridSize) / 6;
-    QVector<QVector<double>> gaussKernel;
-
-    double coeff = 1 / (2 * M_PI * sigma * sigma);
-    double delitel = 2 * sigma * sigma;
-
-    for (int u = -histogramRadius; u <= histogramRadius; u++)
-    {
-        QVector<double> gaussRow;
-        for (int v = -histogramRadius; v <= histogramRadius; v++)
-        {
-            gaussRow.append( coeff * exp(- (u * u + v * v) / delitel));
-        }
-         gaussKernel.append(gaussRow);
-    }
-
-
-    int pointCount=0;
     //для каждой интересной точки
-    foreach(InterestingPoints::interestPoint keyPoint, harrisPoints.points)
+    foreach(InterestingPoints::InterestPoint keyPoint, harrisPoints.points)
     {
-        pointCount++;
-        int     x = keyPoint.x,
-                y = keyPoint.y;
+        int x = keyPoint.x;
+        int y = keyPoint.y;
+        int angle = keyPoint.angle;
         Descriptor pointDescriptor(basketNum,histogramGridSize,descriptorSize,x, y);
         for(int ih=-descriptorRadius; ih<descriptorRadius; ih++)
         {
             for(int jh=-descriptorRadius; jh<descriptorRadius; jh++)
             {
-                int     currX=x+jh, //текущий х в сетке
-                        currY=y+ih; //текущий у в сетке
-
-                double currDirection = gradientDirection.GetValue(currX,currY);
-                currDirection = (currDirection < 0) ? currDirection + 360 : currDirection;
-                currDirection = (currDirection >= 360) ? currDirection - 360 : currDirection;
-                double currMagnitude = gradientMagnitude.GetValue(currX,currY);
-
-                double basketBetw = currDirection / basketSize;
-
-                int basket1 = floor(basketBetw);
-                double b1Weight = 1;
-
-                int basket2 = ceil(basketBetw);
-                double b2Weight = 0;
-
-                //если на границе с 0 или 360 градусов
-                if(basketBetw < basket1 + 0.5)
+                if(sqrt(ih * ih + jh * jh) < sqrt(2)*descriptorRadius)
                 {
-                    basket2 = basket1 - 1;
-                    if(basket2 < 0) basket2 = basketNum - 1;
+                    int rotatedX = ih * cos(angle * M_PI / 180.0) +
+                            jh * sin(angle * M_PI / 180.0);
+                    int rotatedY = jh * cos(angle * M_PI / 180.0) -
+                            ih * sin(angle * M_PI / 180.0);
+                    rotatedX = (rotatedX > descriptorRadius) ? descriptorRadius : ((rotatedX < -descriptorRadius) ? -descriptorRadius : rotatedX);
+                    rotatedY = (rotatedY > descriptorRadius) ? descriptorRadius : ((rotatedY < -descriptorRadius) ? -descriptorRadius : rotatedY);
 
-                    b1Weight = abs(basketBetw - floor(basketBetw) + 0.5);
+                    double currMagnitude = gradientMagnitude.GetValue(x+ih,y+jh);
+                    double currDirection = gradientDirection.GetValue(x+ih,y+jh) - angle;
+                    currDirection = (currDirection < 0) ? currDirection + 360 : currDirection;
+                    currDirection = (currDirection >= 360) ? currDirection - 360 : currDirection;
+                    int histRowNum = ((rotatedX + descriptorRadius) / histogramGridSize - 0.1);
+                    int histColNum = ((rotatedY + descriptorRadius) / histogramGridSize - 0.1);
+                    int currHist =  descriptorSize * histRowNum + histColNum;
+
+                    double basketBetw = currDirection / basketSize;
+                    int basket1 = floor(basketBetw);
+                    double b1Weight = 1;
+                    int basket2 = ceil(basketBetw);
+                    double b2Weight = 0;
+
+                    //если на границе с 0 или 360 градусов
+                    if(basketBetw < basket1 + 0.5)
+                    {
+                        basket2 = basket1 - 1;
+                        if(basket2 < 0) basket2 = basketNum - 1;
+
+                        b1Weight = abs(basketBetw - floor(basketBetw) + 0.5);
+                    }
+                    else
+                    {
+                        basket2 = basket1 + 1;
+                        if(basket2 > basketNum - 1) basket2 = 0;
+
+                        b1Weight = abs(basketBetw - floor(basketBetw) - 0.5);
+
+                    }
+                    b2Weight = 1. - b1Weight;
+
+                    pointDescriptor.addToBasket(currHist, basket1, currMagnitude*b1Weight);
+                    pointDescriptor.addToBasket(currHist, basket2, currMagnitude*b2Weight);
+
                 }
-                else
-                {
-                    basket2 = basket1 + 1;
-                    if(basket2 > basketNum - 1) basket2 = 0;
-
-                    b1Weight = abs(basketBetw - floor(basketBetw) - 0.5);
-
-                }
-                b2Weight = 1. - b1Weight;
-
-                //определяем гистограмму, в которую записываем значение
-                int histRowNum = (ih + descriptorRadius) / descriptorSize / histogramRadius;
-                int histColNum = (jh + descriptorRadius)  / descriptorSize / histogramRadius;
-                int currHist =  descriptorSize * histRowNum + histColNum;
-
-                pointDescriptor.addToBasket(currHist, basket1, currMagnitude*b1Weight * gaussKernel[(ih+descriptorRadius)/(descriptorSize)][(jh+descriptorRadius)/(descriptorSize)]);
-                pointDescriptor.addToBasket(currHist, basket2, currMagnitude*b2Weight * gaussKernel[(ih+descriptorRadius)/(descriptorSize)][(jh+descriptorRadius)/(descriptorSize)]);
-
             }
         }
         pointDescriptor.Normalize();
@@ -145,20 +244,19 @@ ImgMatrix DescriptorFabric::Merge(ImgMatrix inputMatrix2)
 QImage DescriptorFabric::CompareDescriptor(ImgMatrix inputMatrix2, QVector<Descriptor> descriptors2)
 {
     ImgMatrix resultGSMatrix = Merge(inputMatrix2);
-
-
     QImage resultImage = resultGSMatrix.getImage();
-
     QPainter painter (&resultImage);
     painter.setPen(QColor(255, 255, 255, 200));
+    QList<int> foundList;
     int w = inputMatrix1.Width();
-   // int h = inputMatrix1.Height();
+    //int h = inputMatrix1.Height();
 
     QVector<QVector<double>> distMatrix;
+    QVector<double> modVector;
     double minValue = std::numeric_limits<double>::max();
     double maxValue = std::numeric_limits<double>::min();
     double middleValue = 0;
-
+    double modValue = 0;
     //Мин Макс и среднее
     for(int i = 0; i < descriptors1.size(); i++)
     {
@@ -167,7 +265,7 @@ QImage DescriptorFabric::CompareDescriptor(ImgMatrix inputMatrix2, QVector<Descr
         {
             double dist = Distance(descriptors1[i], descriptors2[j]);
             distRow.append(dist);
-
+            modVector.append(dist);
             middleValue += dist;
             if(dist < minValue){
                 minValue = dist;
@@ -179,7 +277,8 @@ QImage DescriptorFabric::CompareDescriptor(ImgMatrix inputMatrix2, QVector<Descr
         distMatrix.append(distRow);
     }
     middleValue /= descriptors1.size() * descriptors2.size();
-
+    std::sort(modVector.begin(), modVector.end());
+    modValue = modVector[3*qMin(descriptors1.size(),descriptors2.size())];
     //Поиск соответствий
     for(int i = 0; i < descriptors1.size(); i++){
         double firstMinValue = std::numeric_limits<double>::max();
@@ -220,9 +319,14 @@ QImage DescriptorFabric::CompareDescriptor(ImgMatrix inputMatrix2, QVector<Descr
             }
         }
 
-        //берем точку если у нее NNDR < 0.6 (борьба с многозначностью). Также отбрасываем "ложные срабатывания"
-        if(firstMinValue / secondMinValue < 0.6 && firstMinValue2 / secondMinValue2 < 0.6 && firstMinValue < middleValue * 0.1){
-
+        //берем точку если у нее NNDR < 0.8 (борьба с многозначностью). Также отбрасываем "ложные срабатывания"
+        if(foundList.indexOf(firstMinIndex) == -1
+                && firstMinValue <= modValue
+                && firstMinValue / secondMinValue < 0.8
+                && firstMinValue2 / secondMinValue2 < 0.8
+                )
+        {
+            foundList.append(firstMinIndex);
             int r = rand() % 256;
             int g = rand() % 256;
             int b = rand() % 256;

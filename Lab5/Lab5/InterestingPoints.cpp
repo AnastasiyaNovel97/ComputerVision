@@ -47,7 +47,7 @@ ImgMatrix InterestingPoints::Moravec(int windowRadius, int resultPointsNum)
     MinimizePoints(resultPointsNum, maxRadius);
 
     smoothMatrix = inputMatrix;
-    foreach (interestPoint point, myInterestPoints.points) {
+    foreach (InterestPoint point, myInterestPoints.points) {
         for(int i=-1; i<=1; i++)
         {
             for(int j=-1; j<=1; j++)
@@ -102,7 +102,7 @@ void InterestingPoints::LocalMaximums(ImgMatrix responseMatrix, int windowRadius
                 }
             }
             if (is_correct && sLocal > threshold) {
-                myInterestPoints.points.append(interestPoint(j,i,sLocal));
+                myInterestPoints.points.append(InterestPoint(j,i,sLocal));
             }
         }
     }
@@ -118,16 +118,24 @@ void InterestingPoints::MinimizePoints(int resultPointsNum, int maxRadius)
         {
             for(int j=0; j< myInterestPoints.points.size(); j++)
             {
-                double xd = myInterestPoints.points[i].x - myInterestPoints.points[j].x;
-                double yd = myInterestPoints.points[i].y - myInterestPoints.points[j].y;
-                double dist = sqrt(xd * xd + yd * yd);
-                if(dist <= r)
+                if(i != j)
                 {
-                    if(myInterestPoints.points[i].sLocal < myInterestPoints.points[j].sLocal)
+                    double xd = myInterestPoints.points[i].x - myInterestPoints.points[j].x;
+                    double yd = myInterestPoints.points[i].y - myInterestPoints.points[j].y;
+                    double dist = sqrt(xd * xd + yd * yd);
+                    if(dist <= r)
                     {
-                        myInterestPoints.points.remove(i);
-                        i--;
-                        j = myInterestPoints.points.size();
+                        if(myInterestPoints.points[i].sLocal < myInterestPoints.points[j].sLocal)
+                        {
+                            myInterestPoints.points.remove(i);
+                            i--;
+                            j = myInterestPoints.points.size();
+                        }
+                        else
+                        {
+                            myInterestPoints.points.remove(j);
+                            j--;
+                        }
                     }
                 }
             }
@@ -215,7 +223,7 @@ ImgMatrix InterestingPoints::Harris(int windowRadius, int resultPointsNum)
     MinimizePoints(resultPointsNum, std::min(w/2,h/2));
 
     smoothMatrix = inputMatrix;
-    foreach (interestPoint point, myInterestPoints.points)
+    foreach (InterestPoint point, myInterestPoints.points)
         for(int i=-1; i<=1; i++)
             for(int j=-1; j<=1; j++)
                 if(i==0 || j==0)
