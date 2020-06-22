@@ -46,12 +46,12 @@ int main(int argc, char *argv[])
 
     QCoreApplication a(argc, argv);
 
-    lab1("D:\\ComputerVision\\Lab1\\","bicycle",".jpg",3);
-    lab1("D:\\ComputerVision\\Lab1\\","bunny",".jpg",3);
-    lab1("D:\\ComputerVision\\Lab1\\","elf",".jpg",3);
-    lab1("D:\\ComputerVision\\Lab1\\","anime",".jpg",3);
-    lab1("D:\\ComputerVision\\Lab1\\","anime2",".jpg",3);
-      lab1("D:\\ComputerVision\\Lab1\\","city",".jpg",3);
+    //lab1("D:\\ComputerVision\\Lab1\\","bicycle",".jpg",3);
+   // lab1("D:\\ComputerVision\\Lab1\\","bunny",".jpg",3);
+    //lab1("D:\\ComputerVision\\Lab1\\","elf",".jpg",3);
+   // lab1("D:\\ComputerVision\\Lab1\\","anime",".jpg",3);
+    lab1("D:\\ComputerVision\\Lab1\\","anime2",".jpg",6);
+      lab1("D:\\ComputerVision\\Lab1\\","city",".jpg",6);
     Print("\nПреобразования изображений закончены, изменения сохранены в папке Modified.");
 
     return a.exec();
