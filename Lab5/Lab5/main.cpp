@@ -35,30 +35,35 @@ void lab5(QString path,QString fileName1, QString ext1,QString fileName2, QStrin
 
 int main()
 {
-//    lab5("D:\\ComputerVision\\Lab5\\","frog",".jpg","frog27",".jpg",3,400,8,16,4);
-//    lab5("D:\\ComputerVision\\Lab5\\","frog",".jpg","frog45",".jpg",3,400,8,16,4);
-//    lab5("D:\\ComputerVision\\Lab5\\","frog",".jpg","frog90",".jpg",3,400,8,16,4);
-//    lab5("D:\\ComputerVision\\Lab5\\","frog",".jpg","frog180",".jpg",3,400,8,16,4);
+    lab5("D:\\ComputerVision\\Lab5\\","frog",".jpg","frog27",".jpg",3,400,8,16,4);
+    lab5("D:\\ComputerVision\\Lab5\\","frog",".jpg","frog45",".jpg",3,400,8,16,4);
+    lab5("D:\\ComputerVision\\Lab5\\","frog",".jpg","frog90",".jpg",3,400,8,16,4);
+    lab5("D:\\ComputerVision\\Lab5\\","frog",".jpg","frog180",".jpg",3,400,8,16,4);
 
-//    lab5("D:\\ComputerVision\\Lab5\\","elf",".jpg","elf12",".jpg",3,400,8,16,4);
-//    lab5("D:\\ComputerVision\\Lab5\\","elf",".jpg","elf90",".jpg",3,400,8,16,4);
-//    lab5("D:\\ComputerVision\\Lab5\\","elf",".jpg","elf180",".jpg",3,400,8,16,4);
-//    lab5("D:\\ComputerVision\\Lab5\\","elf",".jpg","elf320",".jpg",3,400,8,16,4);
+    lab5("D:\\ComputerVision\\Lab5\\","elf",".jpg","elf12",".jpg",3,400,8,16,4);
+    lab5("D:\\ComputerVision\\Lab5\\","elf",".jpg","elf90",".jpg",3,400,8,16,4);
+    lab5("D:\\ComputerVision\\Lab5\\","elf",".jpg","elf180",".jpg",3,400,8,16,4);
+    lab5("D:\\ComputerVision\\Lab5\\","elf",".jpg","elf320",".jpg",3,400,8,16,4);
 
-//    lab5("D:\\ComputerVision\\Lab5\\","me",".jpg","me2",".jpg",3,400,8,16,4);
-//    lab5("D:\\ComputerVision\\Lab5\\","me",".jpg","me3",".jpg",3,400,8,16,4);
-//    lab5("D:\\ComputerVision\\Lab5\\","me",".jpg","me4",".jpg",3,400,8,16,4);
-//    lab5("D:\\ComputerVision\\Lab5\\","me",".jpg","me5",".jpg",3,400,8,16,4);
-
-//    lab5("D:\\ComputerVision\\Lab5\\","Lizard",".png","Lizard2",".png",3,400,8,16,4);
-//    lab5("D:\\ComputerVision\\Lab5\\","Lizard",".png","Lizard3",".png",3,400,8,16,4);
-//    lab5("D:\\ComputerVision\\Lab5\\","Lizard",".png","Lizard4",".png",3,400,8,16,4);
-//    lab5("D:\\ComputerVision\\Lab5\\","Lizard",".png","Lizard5",".png",3,400,8,16,4);
+    lab5("D:\\ComputerVision\\Lab5\\","Lizard",".png","Lizard2",".png",3,400,8,16,4);
+    lab5("D:\\ComputerVision\\Lab5\\","Lizard",".png","Lizard3",".png",3,400,8,16,4);
+    lab5("D:\\ComputerVision\\Lab5\\","Lizard",".png","Lizard4",".png",3,400,8,16,4);
+    lab5("D:\\ComputerVision\\Lab5\\","Lizard",".png","Lizard5",".png",3,400,8,16,4);
 
     lab5("D:\\ComputerVision\\Lab5\\","school",".jpg","school2",".jpg",3,400,8,16,4);
     lab5("D:\\ComputerVision\\Lab5\\","school",".jpg","school3",".jpg",3,400,8,16,4);
     lab5("D:\\ComputerVision\\Lab5\\","school",".jpg","school4",".jpg",3,400,8,16,4);
     lab5("D:\\ComputerVision\\Lab5\\","school",".jpg","school5",".jpg",3,400,8,16,4);
+
+    lab5("D:\\ComputerVision\\Lab5\\","Lena",".jpg","Lena2",".jpg",3,400,8,16,4);
+    lab5("D:\\ComputerVision\\Lab5\\","Lena",".jpg","Lena3",".jpg",3,400,8,16,4);
+    lab5("D:\\ComputerVision\\Lab5\\","Lena",".jpg","Lena4",".jpg",3,400,8,16,4);
+    lab5("D:\\ComputerVision\\Lab5\\","Lena",".jpg","Lena5",".jpg",3,400,8,16,4);
+
+    lab5("D:\\ComputerVision\\Lab5\\","city",".jpg","city2",".jpg",3,400,8,16,4);
+    lab5("D:\\ComputerVision\\Lab5\\","city",".jpg","city3",".jpg",3,400,8,16,4);
+    lab5("D:\\ComputerVision\\Lab5\\","city",".jpg","city4",".jpg",3,400,8,16,4);
+    lab5("D:\\ComputerVision\\Lab5\\","city",".jpg","city5",".jpg",3,400,8,16,4);
 
 
      Print("\nВыполнение успешно завершено.\n");
